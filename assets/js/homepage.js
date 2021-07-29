@@ -7,6 +7,8 @@ var repoSearchTerm = document.querySelector('#repo-search-term');
 var repoUser = document.location.search;
 var currRepo = repoUser.split('=')[1];
 
+var languageButtonsEl = document.querySelector('#language-buttons');
+
 var getUserRepos = function(user) {
     var apiUrl = 'https://api.github.com/users/' + user + '/repos';
 
@@ -22,6 +24,20 @@ var getUserRepos = function(user) {
         alert("Unable to connect to GitHub");
       });
 };
+
+var getFeaturedRepos = function(language) {
+    var apiUrl = 'https://api.github.com/search/repositories?q=' + language + '+is:featured&sort=help-wanted-issues';
+
+    fetch(apiUrl).then(function(response) {
+        if(response.ok) {
+            response.json().then(function(data) {
+                displayRepos(data.items, language);
+            }) 
+        } else {
+            alert('Error: Github User Not Found');
+        }
+    })
+}
 
 var formSubmitHandler = function(event) {
     event.preventDefault();
@@ -71,4 +87,15 @@ var displayRepos = function(repos, searchTerm) {
     }
 }
 
+var buttonClickHandler = function(event) {
+    var language = event.target.getAttribute("data-language");
+
+    if(language) {
+        getFeaturedRepos(language);
+    } else {
+        repoContainerEl.textContent = '';
+    }
+}
+
+languageButtonsEl.addEventListener('click', buttonClickHandler);
 getUserRepos(currRepo);
